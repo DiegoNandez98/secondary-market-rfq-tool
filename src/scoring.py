@@ -8,6 +8,31 @@ def get_priority_label(score):
     else:
         return "LOW"
 
+
+def get_priority_reasons(row):
+    reasons = []
+
+    if row["barrier_risk_score"] >= 0.6:
+        reasons.append("Near barrier")
+
+    if row["market_move_score"] >= 0.6:
+        reasons.append("Large market move")
+
+    if row["iv_score"] >= 0.6:
+        reasons.append("IV shock")
+
+    if row["staleness_risk"] >= 0.6:
+        reasons.append("Stale quote")
+
+    if row["size_score"] >= 0.6:
+        reasons.append("Large RFQ")
+
+    if not reasons:
+        reasons.append("No major risk flag") 
+
+    return " | ".join(reasons)
+
+
 def score_rfqs(df):
     df = df.copy()
 
@@ -55,5 +80,7 @@ def score_rfqs(df):
     )
 
     df["priority"] = df["priority_score"].apply(get_priority_label)
+
+    df["priority_reasons"] = df.apply(get_priority_reasons, axis = 1)
     
     return df
