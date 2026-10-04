@@ -2,10 +2,17 @@
 
 A small research project exploring how data could support decision-making on a secondary-market structured-products desk.
 
-The project currently focuses on two questions:
+The project focuses on three questions:
 
 1. Which incoming RFQs should be handled first?
 2. Which RFQs are more likely to result in a trade?
+3. Which existing client positions are more likely to generate SELL flow in the next 24 hours?
+
+These three components operate at different stages:
+
+- **Before an RFQ arrives** → estimate which existing positions are more likely to generate SELL flow.
+- **When an RFQ arrives** → prioritise it based on urgency and market risk.
+- **Once an RFQ arrives** → estimate how likely it is to convert into a trade.
 
 All data is synthetic and the assumptions are simplified for research and learning purposes.
 
@@ -40,18 +47,45 @@ On the test set:
 
 The model is therefore mainly used as a ranking tool rather than as a binary trade/no-trade classifier.
 
+### 3. Retail Flow Prediction
+
+Position snapshots and transaction history are used to estimate the probability that an existing client position generates a SELL within the next 24 hours.
+
+The model uses market, product, position and client-behaviour features.
+
+On the chronological test set:
+
+- Sell rate: 4.0%
+- ROC-AUC: 0.726
+- Top 10% ranked positions: 14.7% sell rate
+- Lift: 3.7x
+
+The position-level probabilities can also be aggregated to estimate expected sell activity.
+
+
 ## Project Structure
 
 ```text
 data/
     synthetic_rfqs.csv
     synthetic_historical_rfqs.csv
+    synthetic_position_snapshots.csv
+    synthetic_transactions.csv
+    synthetic_retail_flow_dataset.csv
+    retail_flow_predictions.csv
+
+models/
+    retail_flow_model.joblib
 
 notebooks/
     01_rfq_exploration.ipynb
     02_rfq_prioritisation.ipynb
     03_generate_historical_rfqs.ipynb
     04_rfq_conversion_prediction.ipynb
+    05_retail_flow_dataset.ipynb
+    06_retail_flow_analysis.ipynb
+    07_retail_flow_prediction.ipynb
+    08_predictive_flow_integration.ipynb
 
 src/
     scoring.py
@@ -62,17 +96,13 @@ src/
 Install the required packages:
 
 ```bash
-pip install pandas numpy scikit-learn jupyter
+pip install pandas numpy scikit-learn matplotlib seaborn jupyter joblib
 ```
 Then run the notebooks in order:
 
-01 → explore the RFQ data
-02 → build the RFQ priority ranking
-03 → generate synthetic historical RFQs
-04 → train and evaluate the RFQ conversion model
-
 ##  Possible Extensions
-- forecast which clients, products and BUY/SELL flows may emerge from market moves
+- integrate sell_probability into RFQ prioritisation
+- aggregate position probabilities into expected secondary-market SELL flow
+- build a separate BUY-flow model
 - include desk risk and hedging information
-- combine RFQ urgency with execution probability
 - calibrate the models on real historical desk data
