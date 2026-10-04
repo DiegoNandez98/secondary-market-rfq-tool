@@ -20,16 +20,23 @@ All data is synthetic and the assumptions are simplified for research and learni
 
 ### 1. RFQ Prioritisation
 
-Incoming RFQs are ranked using factors such as:
+Incoming RFQs are ranked using a transparent rule-based score based on:
 
-- notional size
-- market moves
-- implied volatility changes
 - distance to barrier
-- quote staleness
-- bid-ask spread
+- underlying market move
+- implied volatility change
+- quote staleness, adjusted for recent market activity
+- RFQ notional size
 
-The output is a priority score with simple reasons explaining the ranking.
+The used weights are heuristic assumptions based on the expected relevance of each signal and are not statistically calibrated:
+
+- barrier proximity: 35%
+- market move: 20%
+- implied volatility change: 15%
+- quote staleness: 15%
+- RFQ size: 15%
+
+RFQs are classified as HIGH, MEDIUM or LOW priority, with simple reasons explaining the main drivers of the score.
 
 ### 2. RFQ Conversion Prediction
 
